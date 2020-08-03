@@ -14,12 +14,19 @@ import android.view.MotionEvent;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
+import com.google.ar.core.CameraConfig;
+import com.google.ar.core.CameraConfigFilter;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
+import com.google.ar.core.Session;
 import com.google.ar.sceneform.AnchorNode;
+import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
+
+import java.util.EnumSet;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -56,29 +63,24 @@ public class MainActivity extends AppCompatActivity {
                     if (car == null){
                         return;
                     }
-
                     Anchor anchor = hitresult.createAnchor();
                     AnchorNode anchorNode = new AnchorNode(anchor);
                     anchorNode.setParent(arFragment.getArSceneView().getScene());
 
                     TransformableNode lamp = new TransformableNode(arFragment.getTransformationSystem());
+                    lamp.getScaleController().setMinScale(0.4f);
+                    lamp.getScaleController().setMaxScale(2.0f);
+                    lamp.setLocalScale(new Vector3(0.55f, 0.55f, 0.55f));
                     lamp.setParent(anchorNode);
                     lamp.setRenderable(car);
                     lamp.select();
                 }
         );
-
     }
 
     public static boolean checkIsSupportedDeviceOrFinish(final Activity activity) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-            Log.e(TAG, "Sceneform requires Android N or later");
-            Toast.makeText(activity, "Sceneform requires Android N or later", Toast.LENGTH_LONG).show();
-            activity.finish();
-            return false;
-        }
         String openGlVersionString =
-                ((ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE))
+                ((ActivityManager) Objects.requireNonNull(activity.getSystemService(Context.ACTIVITY_SERVICE)))
                         .getDeviceConfigurationInfo()
                         .getGlEsVersion();
         if (Double.parseDouble(openGlVersionString) < MIN_OPENGL_VERSION) {
